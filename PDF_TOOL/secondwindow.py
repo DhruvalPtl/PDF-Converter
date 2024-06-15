@@ -112,6 +112,8 @@ class secondWindow(QMainWindow):
             self.title.setText(f"<h1>Merge PDF files</h1><h6>Combine PDFs in the order you want with the easiest PDF merger available.</h6><br>")
         elif self.value == "Compression":
             self.title.setText(f"<h1>Compress PDF file</h1><h6>Reduce file size while optimizing for maximal PDF quality.</h6><br>")
+        elif self.value == "Split":
+            self.title.setText("<h1>Split PDF file</h1><h6>Separate one page or a whole set for easy conversion into independent PDF files.<h6><br>")
         elif self.value == "Html2pdf":
             self.title.setText(f"<h1>HTML to PDF</h1><h6>Convert web pages to PDF documents with high accuracy</h6><br>")    
         elif self.value == "pdf2excel":
