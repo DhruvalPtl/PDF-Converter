@@ -42,7 +42,7 @@ pillow==10.4.0
 pycparser==2.22
 pyinstaller==6.9.0
 pyinstaller-hooks-contrib==2024.7
-PyMuPDF @ file:///C:/Users/patel/Downloads/PyMuPDF-1.24.9-cp312-none-win_amd64.whl#sha256=e2828a79415ae3dd90c629697ace51db7f1e81f426fc2fc034c2151dbe58be6e
+PyMuPDF
 PyMuPDFb==1.24.9
 pyparsing==3.1.2
 pypdf==4.3.1
