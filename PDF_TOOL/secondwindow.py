@@ -1,14 +1,15 @@
+import logging
 import sys
 import os
 import shutil
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget,
+     QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget,
     QLabel, QFileDialog, QProgressBar, QMessageBox, QSpacerItem, QSizePolicy, QSpinBox, QCheckBox, QLineEdit
 )
-from PyQt6.QtGui import QIcon, QPixmap, QPainter, QPen, QFont, QColor, QRegularExpressionValidator
+from PyQt6.QtGui import  QIcon, QPixmap, QPainter, QPen, QFont, QColor, QRegularExpressionValidator
 from PyQt6.QtCore import Qt, QRegularExpression
-
 from pdfconvter import PDFConverter
+
 class DragDropArea(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -42,7 +43,8 @@ class DragDropArea(QWidget):
         if event.mimeData().hasUrls():
             files = [url.toLocalFile() for url in event.mimeData().urls()]
             for file in files:
-                destination_path = "D:/Python/project 1/Pdfconverter/TEMP/" + os.path.basename(file)
+                # destination_path = "D:/Python/project 1/Pdfconverter/CONVERTER/TEMP/" + os.path.basename(file)
+                destination_path = "C:/PdfConverter/Temp" + os.path.basename(file)
                 shutil.copy(file, destination_path)
             event.accept()
         else:
@@ -53,10 +55,13 @@ class secondWindow(QMainWindow):
         self.value = value
         self.obj = PDFConverter()
         super().__init__()
-        self.setWindowTitle("File Format Converter")
+        self.setWindowTitle("PDF Converter")
+        fevicon_path = os.path.join(sys._MEIPASS,"images/1.png")
+        self.setWindowIcon(QIcon(fevicon_path))
         self.setGeometry(300, 150, 1500, 900)
         
-        image = QPixmap("D:/Python/project 1/Pdfconverter/images/2.jpg")
+        # image = QPixmap("D:/Python/project 1/Pdfconverter/CONVERTER/images/2.jpg")
+        image = QPixmap(os.path.join(sys._MEIPASS,"images/2.jpg"))
         background_label = QLabel(self)
         background_label.setPixmap(image)
         background_label.setGeometry(0, 0, 1500, 1000)
@@ -305,12 +310,17 @@ class secondWindow(QMainWindow):
             layout.addWidget(self.input_pages_to_extract)
 
     def convert_file(self):
-        source_path = "D:/Python/project 1/Pdfconverter/TEMP1/"
-        source_path1 = "D:/Python/project 1/Pdfconverter/TEMP/"
-        if os.listdir(source_path):
-            shutil.rmtree(source_path, ignore_errors=True)
-        if not os.listdir(source_path1):
-            self.display_message("No PDF files found select first")
+        source_path = "C:/PdfConverter/Temp"
+        # source_path = os.path.join(sys._MEIPASS, "TEMP")
+        source_path1 = "C:/PdfConverter/Temp1"
+        # source_path1 = os.path.join(sys._MEIPASS, "TEMP1")
+
+        if os.path.exists(source_path1) and os.listdir(source_path1):
+            shutil.rmtree(source_path1, ignore_errors=True)
+        os.makedirs(source_path1, exist_ok=True)
+
+        if not os.path.exists(source_path) or not os.listdir(source_path):
+            self.display_message("No PDF files found, select first")
         else:
             self.progress_bar.setValue(0)
             actions = {
@@ -322,7 +332,7 @@ class secondWindow(QMainWindow):
                 "excel2pdf": (self.obj.excel2pdf, "The files have been converted to PDF successfully!"),
                 "pdf2word": (self.obj.pdf2word, "The files have been converted to Word successfully!"),
                 "word2pdf": (self.obj.word2pdf, "The files have been converted to PDF successfully!"),
-                "pdf2pptx": (self.obj.pdf2pptx, "The files have been converted to PowerPoint successfully!"),
+                "pdf2pptx": (self.obj.pdf_to_pptx, "The files have been converted to PowerPoint successfully!"),
                 "pptx2pdf": (self.obj.pptx2pdf, "The files have been converted to PDF successfully!"),
                 "pdf2jpg": (self.obj.pdf2images, "The files have been converted to JPG successfully!"),
                 "jpg2pdf": (self.obj.image2pdf, "The files have been converted to PDF successfully!")
@@ -339,9 +349,9 @@ class secondWindow(QMainWindow):
                 if function:
                     if action_name == self.value:
                         function()
+                        self.progress_bar.setValue(100)
                         self.display_message(message)
                         self.obj.emptydir()
-            self.progress_bar.setValue(100)
                 
     def perform_split_action(self):
         from_page = self.spin_box_from.value()
@@ -358,7 +368,8 @@ class secondWindow(QMainWindow):
         self.obj.emptydir()
                     
     def select_input_file(self):
-        source_path = "D:/Python/project 1/Pdfconverter/TEMP/"
+        source_path = "C:/PdfConverter/Temp"
+        # source_path = os.path.join(sys._MEIPASS, "TEMP")
         file_dialog = QFileDialog()
         file_paths, _ = file_dialog.getOpenFileNames(self, "Select files to convert", "", "ALL(*.*);;PDF Files (*.pdf);;Excel Files (*.xlsx);;Word Files (*.docx);;PowerPoint Files (*.pptx);;HTML Files (*.html);;JPEG Files (*.jpg);;PNG Files(*.png)")
         if file_paths:
@@ -367,12 +378,14 @@ class secondWindow(QMainWindow):
                 shutil.copy(file_path, destination_path)
 
     def download_file(self):
-        source_dir = "D:/Python/project 1/Pdfconverter/TEMP1"
+        source_dir = "C:/PdfConverter/Temp1"
+        # source_dir = os.path.join(sys._MEIPASS, "TEMP1")
         file_exte = [".pdf", ".xlsx", ".docx", ".pptx", ".jpg", ".png"]
         pdf_files = [i for i in os.listdir(source_dir) if os.path.splitext(i)[1] in file_exte]
         
         if not pdf_files:
             self.display_message(f"No files found. Try to convert first.")
+            logging.info(f"No files found. Try to convert first.")
             return
 
         if len(pdf_files) == 1:
@@ -406,4 +419,3 @@ class secondWindow(QMainWindow):
         msg_box = QMessageBox()
         msg_box.setText(message)
         msg_box.exec()
-

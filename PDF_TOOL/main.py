@@ -1,15 +1,20 @@
-import sys
+import sys,os
 from PyQt6.QtWidgets import QLabel, QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QWidget, QSpacerItem, QSizePolicy
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import QSize, Qt
 from secondwindow import secondWindow
+from setup_script import install_resources
+install_resources()
+from log import log_system
+log_system()
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("File Format Converter")
+        self.setWindowTitle("PDF Converter")
+        fevicon_path = os.path.join(sys._MEIPASS,"images/1.png")
+        self.setWindowIcon(QIcon(fevicon_path))
         self.setGeometry(300, 150, 1500, 900)
-
         self.setup_ui()
 
     def setup_ui(self):
@@ -17,7 +22,8 @@ class MainWindow(QMainWindow):
         self.setup_layouts()
 
     def setup_background(self):
-        image_path = "D:/Python/project 1/Pdfconverter/images/2.jpg"
+        # image_path = "D:/Python/project 1/Pdfconverter/images/2.jpg"
+        image_path = os.path.join(sys._MEIPASS,"images/2.jpg")
         background_label = QLabel(self)
         background_label.setPixmap(QPixmap(image_path))
         background_label.setGeometry(0, 0, 1500, 1000)
@@ -45,13 +51,14 @@ class MainWindow(QMainWindow):
         top_layout.addWidget(self.pdf_label)
 
         buttons = ["Compress PDF", "Merge PDF", "Split PDF"]
-        for index,btn_text in enumerate(buttons):
+        for index, btn_text in enumerate(buttons):
             button = QPushButton(btn_text)
             button.setStyleSheet("QPushButton { margin:20px; font-size:20px;font-weight:500;color:#161616;background-color: transparent;border: none;}QPushButton:hover {color: #e5322d;}")
             button.setCursor(Qt.CursorShape.PointingHandCursor)
             button.setToolTip(btn_text)
-            button.clicked.connect(lambda _, name=buttons[index]: self.on_button_clicked(name))
+            button.clicked.connect(lambda _, name=btn_text: self.on_button_clicked(name))
             top_layout.addWidget(button)
+
 
         spacer_item = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         top_layout.addItem(spacer_item)
@@ -83,20 +90,31 @@ class MainWindow(QMainWindow):
         self.sub_layout2 = QGridLayout()
         
         self.sub_layout2.setSpacing(26)
-        
         icons = [
-            "D:/Python/project 1/Pdfconverter/images/compress.png",
-            "D:/Python/project 1/Pdfconverter/images/merge.png",
-            "D:/Python/project 1/Pdfconverter/images/split.png",
-            "D:/Python/project 1/Pdfconverter/images/htmltopdf.png",
-            "D:/Python/project 1/Pdfconverter/images/pdftoexcel.png",
-            "D:/Python/project 1/Pdfconverter/images/exceltopdf.png",
-            "D:/Python/project 1/Pdfconverter/images/pdftoword.png",
-            "D:/Python/project 1/Pdfconverter/images/wordtopdf.png",
-            "D:/Python/project 1/Pdfconverter/images/pdftopp.png",
-            "D:/Python/project 1/Pdfconverter/images/pptopdf.png",
-            "D:/Python/project 1/Pdfconverter/images/pdftojpg.png",
-            "D:/Python/project 1/Pdfconverter/images/jpgtopdf.png",
+            os.path.join(sys._MEIPASS,"images/compress.png"),
+            os.path.join(sys._MEIPASS,"images/merge.png"),
+            os.path.join(sys._MEIPASS,"images/split.png"),
+            os.path.join(sys._MEIPASS,"images/htmltopdf.png"),
+            os.path.join(sys._MEIPASS,"images/pdftoexcel.png"),
+            os.path.join(sys._MEIPASS,"images/exceltopdf.png"),
+            os.path.join(sys._MEIPASS,"images/pdftoword.png"),
+            os.path.join(sys._MEIPASS,"images/wordtopdf.png"),
+            os.path.join(sys._MEIPASS,"images/pdftopp.png"),
+            os.path.join(sys._MEIPASS,"images/pptopdf.png"),
+            os.path.join(sys._MEIPASS,"images/pdftojpg.png"),
+            os.path.join(sys._MEIPASS,"images/jpgtopdf.png"),
+            # "C:/PdfConverter/images/compress.png",
+            # "C:/PdfConverter/images/merge.png",
+            # "C:/PdfConverter/images/split.png",
+            # "C:/PdfConverter/images/htmltopdf.png",
+            # "C:/PdfConverter/images/pdftoexcel.png",
+            # "C:/PdfConverter/images/exceltopdf.png",
+            # "C:/PdfConverter/images/pdftoword.png",
+            # "C:/PdfConverter/images/wordtopdf.png",
+            # "C:/PdfConverter/images/pdftopp.png",
+            # "C:/PdfConverter/images/pptopdf.png",
+            # "C:/PdfConverter/images/pdftojpg.png",
+            # "C:/PdfConverter/images/jpgtopdf.png",
         ]
         button_names = ["Compress PDF","Merge PDF","Split PDF","HTML to PDF","PDF to Excel","Excel to PDF","PDF to Word","Word to PDF","PDF to PowerPoint","PowerPoint to PDF","PDF to JPG","JPG to PDF"]
         for i in range(3):
@@ -143,6 +161,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyle("WindowsVista")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
