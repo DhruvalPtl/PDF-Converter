@@ -35,6 +35,7 @@
    ```bash
    pip install -r requirements.txt
    ```
+   Also Manually download and install wkhtmltopdf from folder wkhtmltopdf or from https://wkhtmltopdf.org/downloads.html
 
 3. **Run the Application**:
    Execute the main script to launch the application:
