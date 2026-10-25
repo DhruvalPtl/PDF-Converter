@@ -1,6 +1,6 @@
 """
-Modern 2026-Era Fluent & Linear-Inspired Theme Manager for PDF Converter Pro.
-Provides high-polish Dark Mode and Light Mode stylesheets for PyQt6.
+Modern 2026-Era Desktop Theme Manager for PDF Converter.
+Provides high-polish Dark Mode and Light Mode stylesheets with Sidebar navigation.
 """
 
 from PyQt6.QtWidgets import QApplication, QWidget
@@ -14,38 +14,112 @@ QMainWindow, QWidget#centralWidget, QWidget#dashboardPage, QWidget#studioPage {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
-/* Header & Navigation Bar */
-QWidget#topNavBar {
+/* Sidebar */
+QWidget#sidebarWidget {
+    background-color: #FFFFFF;
+    border-right: 1px solid #E2E8F0;
+}
+
+QLabel#sidebarBrand {
+    font-size: 17px;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.3px;
+}
+
+QLabel#sidebarSectionTitle {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94A3B8;
+    letter-spacing: 0.8px;
+    margin-top: 14px;
+    margin-bottom: 4px;
+    padding-left: 4px;
+}
+
+QPushButton.sidebarBtn {
+    background-color: transparent;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+QPushButton.sidebarBtn:hover {
+    background-color: #F1F5F9;
+    color: #0F172A;
+}
+
+QPushButton.sidebarBtn:checked {
+    background-color: #4F46E5;
+    color: #FFFFFF;
+    font-weight: 700;
+    border: 1px solid #4F46E5;
+}
+
+QPushButton#themeToggleBtn {
+    background-color: #F8FAFC;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #CBD5E1;
+    text-align: center;
+}
+
+QPushButton#themeToggleBtn:hover {
+    background-color: #F1F5F9;
+    border-color: #94A3B8;
+    color: #0F172A;
+}
+
+/* Content Header */
+QWidget#contentHeader {
     background-color: #FFFFFF;
     border-bottom: 1px solid #E2E8F0;
 }
 
-QLabel#brandTitle {
-    font-size: 20px;
+QLabel#contentHeaderTitle {
+    font-size: 22px;
     font-weight: 800;
     color: #0F172A;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.3px;
 }
 
-QLabel#brandBadge {
-    background-color: #EEF2FF;
-    color: #4F46E5;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 6px;
-    border: 1px solid #E0E7FF;
+QLabel#contentHeaderSubtitle {
+    font-size: 13px;
+    color: #64748B;
+    font-weight: 500;
 }
 
-/* Category Filter Chips */
+/* Search Bar */
+QLineEdit#searchBar {
+    background-color: #F8FAFC;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #0F172A;
+}
+
+QLineEdit#searchBar:focus {
+    background-color: #FFFFFF;
+    border: 2px solid #4F46E5;
+}
+
+/* Category Chips */
 QPushButton.categoryChip {
     background-color: #F1F5F9;
-    color: #475569;
+    color: #334155;
     font-size: 13px;
     font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 8px;
-    border: 1px solid transparent;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #CBD5E1;
 }
 
 QPushButton.categoryChip:hover {
@@ -56,22 +130,8 @@ QPushButton.categoryChip:hover {
 QPushButton.categoryChip:checked {
     background-color: #4F46E5;
     color: #FFFFFF;
-    border: 1px solid #4338CA;
-}
-
-/* Search Bar */
-QLineEdit#searchBar {
-    background-color: #FFFFFF;
-    border: 1px solid #CBD5E1;
-    border-radius: 10px;
-    padding: 8px 14px;
-    font-size: 13px;
-    color: #0F172A;
-}
-
-QLineEdit#searchBar:focus {
-    border: 2px solid #4F46E5;
-    background-color: #FFFFFF;
+    font-weight: 700;
+    border: 1px solid #4F46E5;
 }
 
 /* Tool Cards */
@@ -87,20 +147,29 @@ QFrame.toolCard:hover {
 }
 
 QLabel.cardTitle {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: #0F172A;
 }
 
 QLabel.cardDesc {
-    font-size: 11px;
+    font-size: 12px;
     color: #64748B;
     line-height: 1.3;
 }
 
+QLabel.cardBadge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: #F1F5F9;
+    color: #64748B;
+}
+
 QLabel.cardArrow {
-    font-size: 16px;
-    color: #94A3B8;
+    font-size: 18px;
+    color: #CBD5E1;
     font-weight: 600;
 }
 
@@ -110,7 +179,7 @@ QFrame.toolCard:hover QLabel.cardArrow {
 
 /* Studio & Dropzone */
 QLabel.stagedHeader {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     color: #0F172A;
 }
@@ -293,64 +362,124 @@ QMainWindow, QWidget#centralWidget, QWidget#dashboardPage, QWidget#studioPage {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
-/* Header & Navigation Bar */
-QWidget#topNavBar {
-    background-color: #111827;
-    border-bottom: 1px solid #1F2937;
+/* Sidebar */
+QWidget#sidebarWidget {
+    background-color: #0F172A;
+    border-right: 1px solid #1E293B;
 }
 
-QLabel#brandTitle {
-    font-size: 20px;
+QLabel#sidebarBrand {
+    font-size: 17px;
     font-weight: 800;
     color: #F8FAFC;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.3px;
 }
 
-QLabel#brandBadge {
-    background-color: #1E1B4B;
-    color: #A5B4FC;
+QLabel#sidebarSectionTitle {
     font-size: 11px;
     font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 6px;
-    border: 1px solid #312E81;
+    color: #64748B;
+    letter-spacing: 0.8px;
+    margin-top: 14px;
+    margin-bottom: 4px;
+    padding-left: 4px;
 }
 
-/* Category Filter Chips */
-QPushButton.categoryChip {
-    background-color: #1E293B;
+QPushButton.sidebarBtn {
+    background-color: transparent;
     color: #94A3B8;
     font-size: 13px;
     font-weight: 600;
-    padding: 6px 14px;
+    text-align: left;
+    padding: 10px 14px;
     border-radius: 8px;
     border: 1px solid transparent;
 }
 
-QPushButton.categoryChip:hover {
-    background-color: #334155;
+QPushButton.sidebarBtn:hover {
+    background-color: #1E293B;
     color: #F8FAFC;
 }
 
-QPushButton.categoryChip:checked {
+QPushButton.sidebarBtn:checked {
     background-color: #6366F1;
     color: #FFFFFF;
-    border: 1px solid #4F46E5;
+    font-weight: 700;
+    border: 1px solid #6366F1;
+}
+
+QPushButton#themeToggleBtn {
+    background-color: #1E293B;
+    color: #E2E8F0;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    text-align: center;
+}
+
+QPushButton#themeToggleBtn:hover {
+    background-color: #334155;
+    border-color: #475569;
+    color: #FFFFFF;
+}
+
+/* Content Header */
+QWidget#contentHeader {
+    background-color: #0F172A;
+    border-bottom: 1px solid #1E293B;
+}
+
+QLabel#contentHeaderTitle {
+    font-size: 22px;
+    font-weight: 800;
+    color: #F8FAFC;
+    letter-spacing: -0.3px;
+}
+
+QLabel#contentHeaderSubtitle {
+    font-size: 13px;
+    color: #94A3B8;
+    font-weight: 500;
 }
 
 /* Search Bar */
 QLineEdit#searchBar {
     background-color: #1E293B;
     border: 1px solid #334155;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 8px 14px;
     font-size: 13px;
     color: #F8FAFC;
 }
 
 QLineEdit#searchBar:focus {
+    background-color: #111827;
     border: 2px solid #6366F1;
+}
+
+/* Category Chips */
+QPushButton.categoryChip {
     background-color: #1E293B;
+    color: #CBD5E1;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #334155;
+}
+
+QPushButton.categoryChip:hover {
+    background-color: #334155;
+    color: #FFFFFF;
+}
+
+QPushButton.categoryChip:checked {
+    background-color: #6366F1;
+    color: #FFFFFF;
+    font-weight: 700;
+    border: 1px solid #6366F1;
 }
 
 /* Tool Cards */
@@ -366,19 +495,28 @@ QFrame.toolCard:hover {
 }
 
 QLabel.cardTitle {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: #F8FAFC;
 }
 
 QLabel.cardDesc {
-    font-size: 11px;
+    font-size: 12px;
     color: #94A3B8;
     line-height: 1.3;
 }
 
+QLabel.cardBadge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: #1E293B;
+    color: #94A3B8;
+}
+
 QLabel.cardArrow {
-    font-size: 16px;
+    font-size: 18px;
     color: #475569;
     font-weight: 600;
 }
@@ -389,9 +527,9 @@ QFrame.toolCard:hover QLabel.cardArrow {
 
 /* Studio & Dropzone */
 QLabel.stagedHeader {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
-    color: #0F172A;
+    color: #F8FAFC;
 }
 
 QLabel.studioTitle {

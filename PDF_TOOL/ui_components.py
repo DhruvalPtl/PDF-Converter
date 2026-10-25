@@ -1,5 +1,5 @@
 """
-Custom Modern UI Components for PDF Converter Pro.
+Custom Modern UI Components for PDF Converter.
 Includes ModernToolCard, ModernDropArea, and interactive staged file cards.
 """
 
@@ -13,11 +13,25 @@ from PyQt6.QtGui import QIcon, QFont, QPainter, QColor, QPen
 
 from icons import get_tool_icon
 
+CATEGORY_COLORS = {
+    "essential": "#EF4444",   # Red
+    "to_pdf": "#3B82F6",      # Blue
+    "from_pdf": "#10B981",    # Emerald
+    "security": "#8B5CF6",    # Purple
+}
+
+CATEGORY_NAMES = {
+    "essential": "ESSENTIAL",
+    "to_pdf": "TO PDF",
+    "from_pdf": "FROM PDF",
+    "security": "SECURITY",
+}
+
 
 class ModernToolCard(QFrame):
     """
     Sleek, elevated card widget representing a single document tool.
-    Includes category-tinted icon container, typography hierarchy, and hover transitions.
+    Includes category color bar, tinted icon container, typography hierarchy, and hover effects.
     """
     clicked = pyqtSignal(str)
 
@@ -28,40 +42,57 @@ class ModernToolCard(QFrame):
         self.category = category
 
         self.setProperty("class", "toolCard")
-        self.setFixedHeight(88)
+        self.setFixedHeight(94)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 12, 16, 12)
-        layout.setSpacing(14)
+        main_layout = QHBoxLayout(self)
+        main_layout.setContentsMargins(14, 12, 16, 12)
+        main_layout.setSpacing(14)
 
-        # Icon Container
+        # 1. Left Color Indicator Strip
+        indicator = QFrame()
+        indicator.setFixedWidth(4)
+        cat_color = CATEGORY_COLORS.get(category, "#6366F1")
+        indicator.setStyleSheet(f"background-color: {cat_color}; border-radius: 2px;")
+        main_layout.addWidget(indicator)
+
+        # 2. Icon Container (50x50)
         icon_label = QLabel()
-        icon_label.setFixedSize(48, 48)
-        icon_label.setPixmap(get_tool_icon(tool_name, size=96).pixmap(48, 48))
-        layout.addWidget(icon_label)
+        icon_label.setFixedSize(50, 50)
+        icon_label.setPixmap(get_tool_icon(tool_name, size=100).pixmap(50, 50))
+        main_layout.addWidget(icon_label)
 
-        # Text Column
+        # 3. Content Column (Category Tag + Title + Description)
         text_layout = QVBoxLayout()
         text_layout.setSpacing(2)
         text_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
+        top_row = QHBoxLayout()
+        top_row.setSpacing(8)
+
         title_label = QLabel(tool_name)
         title_label.setProperty("class", "cardTitle")
-        text_layout.addWidget(title_label)
+        top_row.addWidget(title_label)
+
+        badge_label = QLabel(CATEGORY_NAMES.get(category, "TOOL"))
+        badge_label.setProperty("class", "cardBadge")
+        top_row.addWidget(badge_label)
+        top_row.addStretch()
+
+        text_layout.addLayout(top_row)
 
         desc_label = QLabel(description)
         desc_label.setProperty("class", "cardDesc")
         desc_label.setWordWrap(True)
         text_layout.addWidget(desc_label)
 
-        layout.addLayout(text_layout)
-        layout.addStretch()
+        main_layout.addLayout(text_layout, 1)
 
-        # Chevron Arrow
+        # 4. Chevron Arrow
         arrow_label = QLabel("→")
         arrow_label.setProperty("class", "cardArrow")
-        layout.addWidget(arrow_label)
+        main_layout.addWidget(arrow_label)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -86,7 +117,6 @@ class ModernDropArea(QFrame):
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.setSpacing(6)
 
-        # Upload icon / text
         title = QLabel("Drag & Drop your files here")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setProperty("class", "dropTitle")

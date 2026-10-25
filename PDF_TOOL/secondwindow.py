@@ -59,7 +59,7 @@ class secondWindow(QMainWindow):
         self.temp_output_dir = get_temp_dir("Temp1")
         self.obj = PDFConverter(input_dir=self.temp_input_dir, output_dir=self.temp_output_dir)
 
-        self.setWindowTitle(f"PDF Converter Pro — {self.value}")
+        self.setWindowTitle(f"PDF Converter — {self.value}")
         self.setWindowIcon(get_tool_icon("app_icon", size=64))
         self.resize(1080, 800)
         self.setMinimumSize(850, 650)
@@ -106,7 +106,7 @@ class secondWindow(QMainWindow):
 
         top_bar.addStretch()
 
-        app_title = QLabel("PDF Converter Pro")
+        app_title = QLabel("PDF Converter")
         app_title.setStyleSheet("font-size: 16px; font-weight: 700; color: #64748B;")
         top_bar.addWidget(app_title)
 

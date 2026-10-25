@@ -40,7 +40,7 @@ def test_icons_generation(qapp):
 def test_main_window_instantiation(qapp):
     """Verify MainWindow initializes without any runtime crashes."""
     window = MainWindow()
-    assert window.windowTitle() == "PDF Converter Pro"
+    assert window.windowTitle() == "PDF Converter"
     assert window.centralWidget() is not None
     window.close()
 

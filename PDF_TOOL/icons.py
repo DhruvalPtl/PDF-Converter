@@ -47,21 +47,35 @@ def create_badge_icon(badge_text: str, bg_color: QColor, sub_text: str = "", siz
     corner_path.closeSubpath()
     painter.fillPath(corner_path, QBrush(QColor(255, 255, 255, 60)))
 
-    # Main text (e.g. "PDF", "DOCX", "SPLIT")
+    # Dynamic font scaling to guarantee crisp rendering without clipping
+    badge_len = len(badge_text)
+    if badge_len <= 3:
+        font_scale = 0.24
+    elif badge_len <= 5:
+        font_scale = 0.19
+    elif badge_len <= 7:
+        font_scale = 0.15
+    else:
+        font_scale = 0.12
+
     painter.setPen(QColor(255, 255, 255))
-    font = QFont("Arial", int(size * 0.22), QFont.Weight.Bold)
+    font = QFont("Arial", int(size * font_scale), QFont.Weight.Bold)
     painter.setFont(font)
 
     if sub_text:
         main_rect = QRectF(rect.left(), rect.top() + size * 0.15, rect.width(), size * 0.35)
         painter.drawText(main_rect, Qt.AlignmentFlag.AlignCenter, badge_text)
 
-        sub_font = QFont("Arial", int(size * 0.14), QFont.Weight.DemiBold)
+        sub_len = len(sub_text)
+        sub_scale = 0.14 if sub_len <= 5 else 0.11
+        sub_font = QFont("Arial", int(size * sub_scale), QFont.Weight.DemiBold)
         painter.setFont(sub_font)
         painter.setPen(QColor(255, 255, 255, 220))
         sub_rect = QRectF(rect.left(), rect.top() + size * 0.50, rect.width(), size * 0.30)
         painter.drawText(sub_rect, Qt.AlignmentFlag.AlignCenter, sub_text)
     else:
+        font = QFont("Arial", int(size * 0.30), QFont.Weight.Bold)
+        painter.setFont(font)
         painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, badge_text)
 
     painter.end()
@@ -97,7 +111,7 @@ def get_tool_icon(tool_name: str, size: int = 128) -> QIcon:
 
     # Dynamic fallback generation
     configs = {
-        "Compress PDF": ("COMPRESS", PALETTE["tool"], "PDF"),
+        "Compress PDF": ("ZIP", PALETTE["tool"], "PDF"),
         "Merge PDF": ("MERGE", PALETTE["pdf"], "PDFs"),
         "Split PDF": ("SPLIT", PALETTE["tool"], "PAGES"),
         "HTML to PDF": ("</>", PALETTE["html"], "→ PDF"),
@@ -111,10 +125,10 @@ def get_tool_icon(tool_name: str, size: int = 128) -> QIcon:
         "JPG to PDF": ("JPG", PALETTE["image"], "→ PDF"),
         "Protect PDF": ("LOCK", PALETTE["pdf"], "ENCRYPT"),
         "Unlock PDF": ("OPEN", PALETTE["excel"], "DECRYPT"),
-        "Rotate PDF": ("ROTATE", PALETTE["tool"], "DEGREES"),
+        "Rotate PDF": ("ROTATE", PALETTE["tool"], "90°"),
         "Watermark PDF": ("STAMP", PALETTE["pptx"], "TEXT"),
         "OCR Scanned PDF": ("OCR", PALETTE["image"], "SCAN"),
-        "app_icon": ("PDF", PALETTE["pdf"], "PRO")
+        "app_icon": ("PDF", PALETTE["pdf"], "")
     }
 
     badge_text, bg_color, sub_text = configs.get(tool_name, (tool_name[:4].upper(), PALETTE["tool"], ""))

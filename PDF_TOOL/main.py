@@ -1,7 +1,8 @@
 """
-PDF Converter Pro — Modern Application Dashboard & Studio Launcher.
-Features 2026-era Fluent/Linear design, live tool search, category filters,
-instant Dark/Light theme switching, and seamless single-window stacked navigation.
+PDF Converter — Modern Application Dashboard & Studio Launcher.
+Features 2026-era Linear/macOS design with a persistent navigation sidebar,
+fluid grid layout, live tool search, category filters, instant Dark/Light theme switching,
+and seamless single-window stacked navigation.
 """
 
 import sys
@@ -13,7 +14,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QGridLayout, QPushButton, QWidget, QLabel, QMessageBox,
     QScrollArea, QFrame, QDialog, QListWidget, QListWidgetItem,
-    QLineEdit, QStackedWidget, QButtonGroup
+    QLineEdit, QStackedWidget, QButtonGroup, QSizePolicy
 )
 from PyQt6.QtGui import QIcon, QFont, QAction
 from PyQt6.QtCore import QSize, Qt
@@ -58,6 +59,15 @@ TOOL_DEFINITIONS: List[Tuple[str, str, str, str]] = [
     ("Unlock PDF", "Decrypt and strip password restrictions", "security", "Unlock"),
     ("Watermark PDF", "Stamp custom semi-transparent vector text", "security", "Watermark"),
     ("OCR Scanned PDF", "Make scanned PDFs searchable and selectable", "security", "Ocr"),
+]
+
+# Category definitions: (Button Label, Category ID, Display Title, Subtitle Description)
+CATEGORY_INFO = [
+    ("All Tools (17)", "all", "All Tools", "17 document conversion and management tools"),
+    ("⚡ Essential (4)", "essential", "Essential Tools", "4 core tools for merging, splitting, compressing, and rotating"),
+    ("🔄 Convert to PDF (5)", "to_pdf", "Convert to PDF", "5 tools to convert Office documents, images, and HTML to PDF"),
+    ("🔁 Convert from PDF (4)", "from_pdf", "Convert from PDF", "4 tools to convert PDF pages into Word, Excel, PowerPoint, and images"),
+    ("🔒 Security & OCR (4)", "security", "Security & OCR", "4 tools for AES-256 encryption, password removal, watermarking, and OCR"),
 ]
 
 
@@ -138,15 +148,15 @@ class HistoryDialog(QDialog):
 
 class MainWindow(QMainWindow):
     """
-    Unified Application Window showcasing 17 document tools with live search,
-    category filters, instant theme switching, and seamless stacked workspace navigation.
+    Unified Application Window showcasing 17 document tools with a modern sidebar,
+    fluid responsive grid, live search, instant theme switching, and seamless stacked studio navigation.
     """
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PDF Converter Pro")
+        self.setWindowTitle("PDF Converter")
         self.setWindowIcon(get_tool_icon("app_icon", size=64))
-        self.resize(1180, 840)
-        self.setMinimumSize(960, 680)
+        self.resize(1220, 840)
+        self.setMinimumSize(980, 660)
 
         # Stored tool cards for dynamic filtering
         self.card_widgets: List[Tuple[ModernToolCard, str, str, str]] = []
@@ -164,126 +174,150 @@ class MainWindow(QMainWindow):
         self.central_widget.setObjectName("centralWidget")
         self.setCentralWidget(self.central_widget)
 
-        self.main_layout = QVBoxLayout(self.central_widget)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        # Horizontal split: Sidebar on Left (240px) + Stacked Workspaces on Right
+        self.root_layout = QHBoxLayout(self.central_widget)
+        self.root_layout.setContentsMargins(0, 0, 0, 0)
+        self.root_layout.setSpacing(0)
 
-        # Navigation Bar
-        self.create_top_bar()
+        # 1. Left Navigation Sidebar
+        self.setup_sidebar()
 
-        # Stacked Widget: Page 0 = Dashboard, Page 1 = Studio Workspace
+        # 2. Main Stacked Area
         self.stack = QStackedWidget()
-        self.main_layout.addWidget(self.stack)
+        self.root_layout.addWidget(self.stack, 1)
 
-        # Page 0: Dashboard
+        # Page 0: Dashboard Page
         self.dashboard_page = QWidget()
         self.dashboard_page.setObjectName("dashboardPage")
         self.setup_dashboard_page()
         self.stack.addWidget(self.dashboard_page)
 
-    def create_top_bar(self):
-        """Top bar with branding, live search bar, and action icons."""
-        self.top_container = QWidget()
-        self.top_container.setObjectName("topNavBar")
-        self.top_container.setFixedHeight(68)
+    def setup_sidebar(self):
+        """Construct the fixed-width persistent navigation sidebar."""
+        self.sidebar = QWidget()
+        self.sidebar.setObjectName("sidebarWidget")
+        self.sidebar.setFixedWidth(240)
 
-        layout = QHBoxLayout(self.top_container)
-        layout.setContentsMargins(32, 0, 32, 0)
-        layout.setSpacing(16)
+        sidebar_layout = QVBoxLayout(self.sidebar)
+        sidebar_layout.setContentsMargins(14, 20, 14, 18)
+        sidebar_layout.setSpacing(4)
 
-        # Brand Title + Badge
+        # Brand Header (App Icon + Title)
         brand_row = QHBoxLayout()
-        brand_row.setSpacing(8)
+        brand_row.setSpacing(10)
+        brand_row.setContentsMargins(4, 0, 4, 12)
 
-        brand_label = QLabel("PDF Converter Pro")
-        brand_label.setObjectName("brandTitle")
-        brand_row.addWidget(brand_label)
+        icon_label = QLabel()
+        icon_label.setFixedSize(28, 28)
+        icon_label.setPixmap(get_tool_icon("app_icon", size=56).pixmap(28, 28))
+        brand_row.addWidget(icon_label)
 
-        badge_label = QLabel("v3.0 SOTA")
-        badge_label.setObjectName("brandBadge")
-        brand_row.addWidget(badge_label)
-        layout.addLayout(brand_row)
+        brand_title = QLabel("PDF Converter")
+        brand_title.setObjectName("sidebarBrand")
+        brand_row.addWidget(brand_title)
+        brand_row.addStretch()
 
-        layout.addSpacing(20)
+        sidebar_layout.addLayout(brand_row)
 
-        # Live Search Bar
-        self.search_input = QLineEdit()
-        self.search_input.setObjectName("searchBar")
-        self.search_input.setPlaceholderText("Search 17 tools (e.g. merge, compress, protect, excel)...")
-        self.search_input.setFixedWidth(360)
-        self.search_input.textChanged.connect(self.on_search_text_changed)
-        layout.addWidget(self.search_input)
+        # Section: TOOLS
+        tools_header = QLabel("TOOLS")
+        tools_header.setObjectName("sidebarSectionTitle")
+        sidebar_layout.addWidget(tools_header)
 
-        layout.addStretch()
+        self.category_button_group = QButtonGroup(self)
+        self.category_button_group.setExclusive(True)
 
-        # Recent History button
-        history_btn = QPushButton("Recent History")
-        history_btn.setProperty("class", "secondaryBtn")
+        self.category_buttons = {}
+        for idx, (btn_text, cat_id, title, subtitle) in enumerate(CATEGORY_INFO):
+            # Escape ampersand so Qt does not render it as mnemonic underline
+            btn = QPushButton(btn_text.replace("&", "&&"))
+            btn.setCheckable(True)
+            btn.setProperty("class", "sidebarBtn")
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            if idx == 0:
+                btn.setChecked(True)
+            self.category_button_group.addButton(btn, idx)
+            btn.clicked.connect(lambda _, cid=cat_id, t=title, s=subtitle: self.on_category_selected(cid, t, s))
+            sidebar_layout.addWidget(btn)
+            self.category_buttons[cat_id] = btn
+
+        sidebar_layout.addSpacing(14)
+
+        # Section: WORKSPACE
+        workspace_header = QLabel("WORKSPACE")
+        workspace_header.setObjectName("sidebarSectionTitle")
+        sidebar_layout.addWidget(workspace_header)
+
+        history_btn = QPushButton("🕒  Recent History")
+        history_btn.setProperty("class", "sidebarBtn")
         history_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         history_btn.clicked.connect(self.show_history_dialog)
-        layout.addWidget(history_btn)
+        sidebar_layout.addWidget(history_btn)
 
-        # Theme toggle button
-        theme_label = "🌙 Dark" if self.current_theme == "light" else "☀️ Light"
-        self.theme_btn = QPushButton(theme_label)
-        self.theme_btn.setProperty("class", "secondaryBtn")
-        self.theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.theme_btn.clicked.connect(self.toggle_theme)
-        layout.addWidget(self.theme_btn)
-
-        # Logs button
-        logs_btn = QPushButton("Logs")
-        logs_btn.setProperty("class", "secondaryBtn")
+        logs_btn = QPushButton("📁  View Logs")
+        logs_btn.setProperty("class", "sidebarBtn")
         logs_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         logs_btn.clicked.connect(self.open_logs_folder)
-        layout.addWidget(logs_btn)
+        sidebar_layout.addWidget(logs_btn)
 
-        # About button
-        about_btn = QPushButton("About")
-        about_btn.setProperty("class", "primaryBtn")
+        about_btn = QPushButton("ℹ️  About")
+        about_btn.setProperty("class", "sidebarBtn")
         about_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         about_btn.clicked.connect(self.show_about_dialog)
-        layout.addWidget(about_btn)
+        sidebar_layout.addWidget(about_btn)
 
-        self.main_layout.addWidget(self.top_container)
+        sidebar_layout.addStretch(1)
+
+        # Footer: Theme Switcher Button
+        theme_label = "🌙 Dark Mode" if self.current_theme == "light" else "☀️ Light Mode"
+        self.theme_btn = QPushButton(theme_label)
+        self.theme_btn.setObjectName("themeToggleBtn")
+        self.theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.theme_btn.clicked.connect(self.toggle_theme)
+        sidebar_layout.addWidget(self.theme_btn)
+
+        self.root_layout.addWidget(self.sidebar)
 
     def setup_dashboard_page(self):
-        """Dashboard layout containing category chips and responsive cards grid."""
+        """Build the fluid content area with header, search bar, and card grid."""
         dash_layout = QVBoxLayout(self.dashboard_page)
         dash_layout.setContentsMargins(0, 0, 0, 0)
         dash_layout.setSpacing(0)
 
-        # Filter Chips Bar
-        chips_container = QWidget()
-        chips_container.setStyleSheet("background-color: transparent;")
-        chips_layout = QHBoxLayout(chips_container)
-        chips_layout.setContentsMargins(40, 18, 40, 10)
-        chips_layout.setSpacing(10)
+        # Top Content Header Bar (Title, Subtitle, Live Search Bar)
+        content_header = QWidget()
+        content_header.setObjectName("contentHeader")
+        content_header.setFixedHeight(72)
 
-        self.chip_group = QButtonGroup(self)
-        self.chip_group.setExclusive(True)
+        header_layout = QHBoxLayout(content_header)
+        header_layout.setContentsMargins(28, 0, 28, 0)
+        header_layout.setSpacing(16)
 
-        categories = [
-            ("All (17)", "all"),
-            ("⚡ Essential", "essential"),
-            ("🔄 Convert to PDF", "to_pdf"),
-            ("🔁 Convert from PDF", "from_pdf"),
-            ("🔒 Security && OCR", "security")
-        ]
+        title_col = QVBoxLayout()
+        title_col.setSpacing(2)
+        title_col.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        for idx, (label, cat_id) in enumerate(categories):
-            btn = QPushButton(label)
-            btn.setCheckable(True)
-            btn.setProperty("class", "categoryChip")
-            btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            if idx == 0:
-                btn.setChecked(True)
-            self.chip_group.addButton(btn, idx)
-            btn.clicked.connect(lambda _, cid=cat_id: self.on_category_selected(cid))
-            chips_layout.addWidget(btn)
+        self.header_title = QLabel("All Tools")
+        self.header_title.setObjectName("contentHeaderTitle")
+        title_col.addWidget(self.header_title)
 
-        chips_layout.addStretch()
-        dash_layout.addWidget(chips_container)
+        self.header_subtitle = QLabel("17 document conversion and management tools")
+        self.header_subtitle.setObjectName("contentHeaderSubtitle")
+        title_col.addWidget(self.header_subtitle)
+
+        header_layout.addLayout(title_col)
+        header_layout.addStretch()
+
+        # Search Bar
+        self.search_input = QLineEdit()
+        self.search_input.setObjectName("searchBar")
+        self.search_input.setPlaceholderText("Search tools (e.g. merge, compress, protect)...")
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.setFixedWidth(320)
+        self.search_input.textChanged.connect(self.on_search_text_changed)
+        header_layout.addWidget(self.search_input)
+
+        dash_layout.addWidget(content_header)
 
         # Scrollable Cards Grid
         scroll_area = QScrollArea()
@@ -291,33 +325,19 @@ class MainWindow(QMainWindow):
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setStyleSheet("background-color: transparent;")
 
-        grid_wrapper = QWidget()
-        grid_wrapper.setStyleSheet("background-color: transparent;")
-        wrapper_layout = QHBoxLayout(grid_wrapper)
-        wrapper_layout.setContentsMargins(40, 6, 40, 30)
-
-        # Centered inner container with max width 1140px to prevent horizontal stretching
-        inner_container = QWidget()
-        inner_container.setMaximumWidth(1140)
-        inner_container.setStyleSheet("background-color: transparent;")
-
-        self.grid_layout = QGridLayout(inner_container)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        grid_container = QWidget()
+        grid_container.setStyleSheet("background-color: transparent;")
+        self.grid_layout = QGridLayout(grid_container)
+        self.grid_layout.setContentsMargins(28, 20, 28, 28)
         self.grid_layout.setSpacing(14)
 
-        # Build cards
         self.build_tool_cards()
 
-        wrapper_layout.addStretch()
-        wrapper_layout.addWidget(inner_container)
-        wrapper_layout.addStretch()
-
-        scroll_area.setWidget(grid_wrapper)
-        dash_layout.addWidget(scroll_area)
+        scroll_area.setWidget(grid_container)
+        dash_layout.addWidget(scroll_area, 1)
 
     def build_tool_cards(self):
-        """Instantiate ModernToolCards and arrange in 3 responsive columns."""
-        # Clear existing
+        """Instantiate ModernToolCards and arrange in 3 fluid responsive columns."""
         self.card_widgets.clear()
         columns = 3
 
@@ -329,9 +349,12 @@ class MainWindow(QMainWindow):
             self.grid_layout.addWidget(card, row, col)
             self.card_widgets.append((card, tool_name, tool_desc, category))
 
-    def on_category_selected(self, category_id: str):
-        """Filter tools when category chip is clicked."""
+    def on_category_selected(self, category_id: str, title: str = "All Tools", subtitle: str = ""):
+        """Filter tools when a category button is clicked in the sidebar."""
         self.active_category = category_id
+        self.header_title.setText(title)
+        self.header_subtitle.setText(subtitle)
+        self.show_dashboard()
         self.apply_tool_filters()
 
     def on_search_text_changed(self, text: str):
@@ -340,7 +363,7 @@ class MainWindow(QMainWindow):
         self.apply_tool_filters()
 
     def apply_tool_filters(self):
-        """Show or hide cards based on current active category and search text."""
+        """Show or hide cards based on active category and live search query."""
         visible_cards = []
         for card, name, desc, category in self.card_widgets:
             match_cat = (self.active_category == "all" or category == self.active_category)
@@ -360,6 +383,14 @@ class MainWindow(QMainWindow):
             r = idx // columns
             c = idx % columns
             self.grid_layout.addWidget(card, r, c)
+
+        if self.current_search:
+            self.header_subtitle.setText(f"Showing {len(visible_cards)} matching tools for '{self.current_search}'")
+        else:
+            for _, cid, title, subtitle in CATEGORY_INFO:
+                if cid == self.active_category:
+                    self.header_subtitle.setText(subtitle)
+                    break
 
     def open_tool(self, tool_name: str):
         """Open the tool workspace inside the stacked widget."""
@@ -387,7 +418,7 @@ class MainWindow(QMainWindow):
         self.current_theme = "dark" if self.current_theme == "light" else "light"
         apply_theme(self.current_theme)
         set_setting("theme", self.current_theme)
-        self.theme_btn.setText("🌙 Dark" if self.current_theme == "light" else "☀️ Light")
+        self.theme_btn.setText("🌙 Dark Mode" if self.current_theme == "light" else "☀️ Light Mode")
 
     def show_history_dialog(self):
         """Open the recent conversions history dialog."""
@@ -395,7 +426,7 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def open_logs_folder(self):
-        """Open the application logs folder in Windows Explorer or default file manager."""
+        """Open the application logs folder in file manager."""
         logs_dir = os.path.join(get_app_data_dir(), "logs")
         os.makedirs(logs_dir, exist_ok=True)
         if sys.platform == 'win32':
@@ -407,9 +438,9 @@ class MainWindow(QMainWindow):
         """Display About application dialog."""
         QMessageBox.about(
             self,
-            "About PDF Converter Pro",
-            "<h3>PDF Converter Pro</h3>"
-            "<p>Version 3.0.0 (SOTA Edition)</p>"
+            "About PDF Converter",
+            "<h3>PDF Converter</h3>"
+            "<p>Version 3.0.0</p>"
             "<p>An enterprise-grade desktop suite for document conversion, "
             "merging, splitting, high-ratio compression, OCR, and encryption.</p>"
             "<p><b>Engine:</b> PyQt6, PyMuPDF (C++ MuPDF), pikepdf (C++ QPDF), openpyxl, python-pptx, Chromium Headless</p>"

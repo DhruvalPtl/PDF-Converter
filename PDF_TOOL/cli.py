@@ -1,5 +1,5 @@
 """
-Command Line Interface (CLI) for PDF Converter Pro.
+Command Line Interface (CLI) for PDF Converter.
 Allows headless, automated execution of PDF conversions, merging, splitting,
 watermarking, and encryption directly from the terminal.
 """
@@ -20,7 +20,7 @@ logger = logging.getLogger("pdf_cli")
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="pdfconv",
-        description="PDF Converter Pro — Command Line Interface"
+        description="PDF Converter — Command Line Interface"
     )
     subparsers = parser.add_subparsers(dest="command", required=True, help="Available sub-commands")
 

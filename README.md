@@ -1,28 +1,29 @@
-# PDF-Converter Pro (v2.5)
+# PDF Converter
 
-**PDF-Converter Pro** is an all-in-one desktop and command-line document management suite built with Python and PyQt6. It provides 16 essential tools to convert, merge, split, compress, watermark, protect, unlock, and rotate documents with a modern responsive UI, dark/light theme switching, and non-blocking background concurrency.
+**PDF Converter** is an all-in-one desktop and command-line document management suite built with Python and PyQt6. It provides 17 essential tools to convert, merge, split, compress, watermark, protect, unlock, rotate, and OCR documents with a modern responsive UI, dark/light theme switching, and non-blocking background concurrency.
 
 ---
 
 ## ✨ Comprehensive Features
 
-### 📄 16 Integrated Tools:
+### 📄 17 Integrated Tools:
 1. **Merge PDF**: Combine multiple PDFs in custom sequence with visual drag-to-reorder.
-2. **Compress PDF**: Optimize and deflate PDF content streams.
+2. **Compress PDF**: Optimize and deflate PDF content streams with smart downsampling.
 3. **Split PDF**: Split into single pages, extract page ranges, or cherry-pick specific pages.
 4. **Rotate PDF**: Rotate all or specific pages clockwise by 90°, 180°, or 270°.
-5. **Protect PDF**: Encrypt documents with secure user/owner passwords.
+5. **Protect PDF**: Encrypt documents with military-grade AES-256 passwords.
 6. **Unlock PDF**: Decrypt and strip password restrictions from protected PDFs.
 7. **Watermark PDF**: Stamp custom diagonal semi-transparent vector text across all pages.
-8. **HTML to PDF**: Convert web documents into clean PDF files.
-9. **PDF to Word**: Convert PDF layouts into editable `.docx` Word documents.
-10. **Word to PDF**: Convert Word `.docx` documents into standardized PDFs.
-11. **PDF to Excel**: Extract tabular data from PDFs into structured `.xlsx` workbooks.
-12. **Excel to PDF**: Render spreadsheets into standardized PDF documents.
-13. **PDF to PowerPoint**: Generate presentation slide decks (`.pptx`) from PDF pages.
-14. **PowerPoint to PDF**: Convert slide presentations into PDFs.
-15. **PDF to JPG**: Render high-resolution PNG/JPG images of each page.
-16. **JPG to PDF**: Compile multiple photos/images into a single PDF document.
+8. **OCR Scanned PDF**: Make scanned image-only PDFs searchable and selectable.
+9. **HTML to PDF**: Convert web documents into clean PDF files via Chromium engine.
+10. **PDF to Word**: Convert PDF layouts into editable `.docx` Word documents.
+11. **Word to PDF**: Convert Word `.docx` documents into standardized PDFs.
+12. **PDF to Excel**: Extract tabular data from PDFs into styled `.xlsx` workbooks.
+13. **Excel to PDF**: Render spreadsheets into standardized PDF documents.
+14. **PDF to PowerPoint**: Generate presentation slide decks (`.pptx`) from PDF pages.
+15. **PowerPoint to PDF**: Convert slide presentations into PDFs.
+16. **PDF to JPG**: Render high-resolution PNG/JPG images of each page.
+17. **JPG to PDF**: Compile multiple photos/images into a single PDF document.
 
 ### 🎨 GUI & UX Innovations:
 - **Dark Mode & Light Mode**: Toggle anytime between a sleek Dark Theme and a crisp Light Theme.
