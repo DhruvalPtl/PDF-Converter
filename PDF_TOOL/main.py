@@ -1,167 +1,428 @@
-import sys,os
-from PyQt6.QtWidgets import QLabel, QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QWidget, QSpacerItem, QSizePolicy
-from PyQt6.QtGui import QIcon, QPixmap
+"""
+PDF Converter Pro — Modern Application Dashboard & Studio Launcher.
+Features 2026-era Fluent/Linear design, live tool search, category filters,
+instant Dark/Light theme switching, and seamless single-window stacked navigation.
+"""
+
+import sys
+import os
+import logging
+from typing import List, Tuple
+
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
+    QGridLayout, QPushButton, QWidget, QLabel, QMessageBox,
+    QScrollArea, QFrame, QDialog, QListWidget, QListWidgetItem,
+    QLineEdit, QStackedWidget, QButtonGroup
+)
+from PyQt6.QtGui import QIcon, QFont, QAction
 from PyQt6.QtCore import QSize, Qt
-from secondwindow import secondWindow
+
+from app_paths import get_app_data_dir
 from setup_script import install_resources
-install_resources()
 from log import log_system
-log_system()
+from icons import get_tool_icon
+from secondwindow import secondWindow
+from themes import apply_theme
+from history import get_setting, set_setting, get_history_entries, clear_history
+from ui_components import ModernToolCard
+
+# Initialize logging and resources
+logger = log_system()
+install_resources()
+
+
+# Tool definitions: (Name, Description, Category, ActionKey)
+TOOL_DEFINITIONS: List[Tuple[str, str, str, str]] = [
+    # Essential PDF tools
+    ("Merge PDF", "Combine multiple PDFs in custom sequence", "essential", "Merge"),
+    ("Compress PDF", "60-80% size reduction with smart downsampling", "essential", "Compression"),
+    ("Split PDF", "Extract page ranges or split into single pages", "essential", "Split"),
+    ("Rotate PDF", "Rotate pages clockwise by 90°, 180°, or 270°", "essential", "Rotate"),
+
+    # Convert to PDF
+    ("Word to PDF", "Convert Word DOCX documents to standardized PDF", "to_pdf", "word2pdf"),
+    ("Excel to PDF", "Convert spreadsheet workbooks to PDF", "to_pdf", "excel2pdf"),
+    ("PowerPoint to PDF", "Convert PPTX slide decks to PDF documents", "to_pdf", "pptx2pdf"),
+    ("JPG to PDF", "Compile JPG and PNG images into a clean PDF", "to_pdf", "jpg2pdf"),
+    ("HTML to PDF", "Render modern web pages to PDF via Chromium", "to_pdf", "Html2pdf"),
+
+    # Convert from PDF
+    ("PDF to Word", "Convert PDF to editable DOCX documents", "from_pdf", "pdf2word"),
+    ("PDF to Excel", "Extract tables with C++ MuPDF to styled Excel", "from_pdf", "pdf2excel"),
+    ("PDF to PowerPoint", "Generate editable slides with textframes from PDF", "from_pdf", "pdf2pptx"),
+    ("PDF to JPG", "Render pages as high-resolution PNG images", "from_pdf", "pdf2jpg"),
+
+    # Security & OCR
+    ("Protect PDF", "Encrypt documents with military-grade AES-256", "security", "Protect"),
+    ("Unlock PDF", "Decrypt and strip password restrictions", "security", "Unlock"),
+    ("Watermark PDF", "Stamp custom semi-transparent vector text", "security", "Watermark"),
+    ("OCR Scanned PDF", "Make scanned PDFs searchable and selectable", "security", "Ocr"),
+]
+
+
+class HistoryDialog(QDialog):
+    """Dialog displaying recently completed conversion tasks with quick open actions."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Recent Conversion History")
+        self.resize(680, 440)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setSpacing(14)
+
+        header = QLabel("Recently Completed Conversions:")
+        header.setStyleSheet("font-size: 16px; font-weight: 700;")
+        layout.addWidget(header)
+
+        self.list_widget = QListWidget()
+        entries = get_history_entries(limit=35)
+        if not entries:
+            self.list_widget.addItem("No conversions recorded yet.")
+        else:
+            for entry in entries:
+                ts = entry.get("timestamp", "")
+                tool = entry.get("tool", "")
+                inputs = ", ".join(entry.get("inputs", []))
+                outputs = entry.get("outputs", [])
+                out_str = os.path.basename(outputs[0]) if outputs else "None"
+                item_text = f"[{ts}]  {tool.upper()}  •  {inputs}  →  {out_str}"
+                item = QListWidgetItem(item_text)
+                if outputs:
+                    item.setData(Qt.ItemDataRole.UserRole, outputs[0])
+                    item.setToolTip(f"Double-click to open: {outputs[0]}")
+                self.list_widget.addItem(item)
+
+        self.list_widget.itemDoubleClicked.connect(self.open_output_file)
+        layout.addWidget(self.list_widget)
+
+        btn_row = QHBoxLayout()
+        clear_btn = QPushButton("Clear History")
+        clear_btn.setProperty("class", "secondaryBtn")
+        clear_btn.clicked.connect(self.do_clear_history)
+        btn_row.addWidget(clear_btn)
+
+        btn_row.addStretch()
+
+        open_btn = QPushButton("Open Selected File")
+        open_btn.setProperty("class", "primaryBtn")
+        open_btn.clicked.connect(self.open_selected_item)
+        btn_row.addWidget(open_btn)
+
+        close_btn = QPushButton("Close")
+        close_btn.setProperty("class", "secondaryBtn")
+        close_btn.clicked.connect(self.accept)
+        btn_row.addWidget(close_btn)
+
+        layout.addLayout(btn_row)
+
+    def open_output_file(self, item: QListWidgetItem):
+        file_path = item.data(Qt.ItemDataRole.UserRole)
+        if file_path and os.path.exists(file_path):
+            if sys.platform == 'win32':
+                os.startfile(file_path)
+        elif file_path:
+            QMessageBox.warning(self, "File Not Found", f"The file no longer exists at:\n{file_path}")
+
+    def open_selected_item(self):
+        item = self.list_widget.currentItem()
+        if item:
+            self.open_output_file(item)
+
+    def do_clear_history(self):
+        clear_history()
+        self.list_widget.clear()
+        self.list_widget.addItem("No conversions recorded yet.")
+
 
 class MainWindow(QMainWindow):
+    """
+    Unified Application Window showcasing 17 document tools with live search,
+    category filters, instant theme switching, and seamless stacked workspace navigation.
+    """
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PDF Converter")
-        fevicon_path = os.path.join(sys._MEIPASS,"images/1.png")
-        self.setWindowIcon(QIcon(fevicon_path))
-        self.setGeometry(300, 150, 1500, 900)
+        self.setWindowTitle("PDF Converter Pro")
+        self.setWindowIcon(get_tool_icon("app_icon", size=64))
+        self.resize(1180, 840)
+        self.setMinimumSize(960, 680)
+
+        # Stored tool cards for dynamic filtering
+        self.card_widgets: List[Tuple[ModernToolCard, str, str, str]] = []
+        self.active_category = "all"
+        self.current_search = ""
+
+        # Load saved theme
+        self.current_theme = get_setting("theme", "dark")
+        apply_theme(self.current_theme)
+
         self.setup_ui()
 
     def setup_ui(self):
-        self.setup_background()
-        self.setup_layouts()
-
-    def setup_background(self):
-        # image_path = "D:/Python/project 1/Pdfconverter/images/2.jpg"
-        image_path = os.path.join(sys._MEIPASS,"images/2.jpg")
-        background_label = QLabel(self)
-        background_label.setPixmap(QPixmap(image_path))
-        background_label.setGeometry(0, 0, 1500, 1000)
-
-    def setup_layouts(self):
-        self.main_layout = QVBoxLayout()
         self.central_widget = QWidget()
-        self.central_widget.setLayout(self.main_layout)
+        self.central_widget.setObjectName("centralWidget")
         self.setCentralWidget(self.central_widget)
-        self.main_layout.setSpacing(10)
 
-        self.create_top_layout()
-        self.create_middle_layout()
-        self.create_bottom_layout()  
+        self.main_layout = QVBoxLayout(self.central_widget)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
 
-    def create_top_layout(self):
-        self.top_layout_container = QWidget()
-        
-        self.top_layout_container.setStyleSheet("background-color: #f8f8f8;")
+        # Navigation Bar
+        self.create_top_bar()
 
-        top_layout = QHBoxLayout()
+        # Stacked Widget: Page 0 = Dashboard, Page 1 = Studio Workspace
+        self.stack = QStackedWidget()
+        self.main_layout.addWidget(self.stack)
 
-        self.pdf_label = QLabel("PDF Converter")
-        self.pdf_label.setStyleSheet("padding-bottom:7px;font-size:35px;font-weight:600;color:#161616;")
-        top_layout.addWidget(self.pdf_label)
+        # Page 0: Dashboard
+        self.dashboard_page = QWidget()
+        self.dashboard_page.setObjectName("dashboardPage")
+        self.setup_dashboard_page()
+        self.stack.addWidget(self.dashboard_page)
 
-        buttons = ["Compress PDF", "Merge PDF", "Split PDF"]
-        for index, btn_text in enumerate(buttons):
-            button = QPushButton(btn_text)
-            button.setStyleSheet("QPushButton { margin:20px; font-size:20px;font-weight:500;color:#161616;background-color: transparent;border: none;}QPushButton:hover {color: #e5322d;}")
-            button.setCursor(Qt.CursorShape.PointingHandCursor)
-            button.setToolTip(btn_text)
-            button.clicked.connect(lambda _, name=btn_text: self.on_button_clicked(name))
-            top_layout.addWidget(button)
+    def create_top_bar(self):
+        """Top bar with branding, live search bar, and action icons."""
+        self.top_container = QWidget()
+        self.top_container.setObjectName("topNavBar")
+        self.top_container.setFixedHeight(68)
 
+        layout = QHBoxLayout(self.top_container)
+        layout.setContentsMargins(32, 0, 32, 0)
+        layout.setSpacing(16)
 
-        spacer_item = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        top_layout.addItem(spacer_item)
-        
-        self.button4 = QPushButton("Login")
-        self.button4.setStyleSheet("QPushButton { margin:20px; font-size:20px;font-weight:500;color:#161616;background-color: transparent;border: none;}QPushButton:hover {color: #e5322d;}") 
-        self.button4.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.button4.setToolTip("Login")
-        top_layout.addWidget(self.button4)
-        
-        sign_up_button = QPushButton("Sign Up")
-        sign_up_button.setStyleSheet("QPushButton { padding:5px;font-size:20px;font-weight:600;color:white;background-color:#e5322d;border-radius:11px;}QPushButton:hover {background-color: #bd060a;}")
-        top_layout.addWidget(sign_up_button)
-        
-        self.top_layout_container.setLayout(top_layout)
-        self.main_layout.addWidget(self.top_layout_container)
+        # Brand Title + Badge
+        brand_row = QHBoxLayout()
+        brand_row.setSpacing(8)
 
-    def create_middle_layout(self):
-        self.sub_layout3 = QVBoxLayout()
-        self.title = QLabel()
-        self.title.setText(f"<h1>All the essential PDF tools consolidated into one convenient platform.</h1><h2>Every tool you need to use PDFs, at your fingertips. All are easy to use!<br> Compress, Merge, Split, Convert PDFs with just a few clicks.</h2><br><br>")
-        self.title.setStyleSheet("font-size: 15px;font-weight: 600;color: #33333b;")
-        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.sub_layout3.addWidget(self.title)
-        
-        self.main_layout.addLayout(self.sub_layout3)
+        brand_label = QLabel("PDF Converter Pro")
+        brand_label.setObjectName("brandTitle")
+        brand_row.addWidget(brand_label)
 
-    def create_bottom_layout(self):
-        self.sub_layout2 = QGridLayout()
-        
-        self.sub_layout2.setSpacing(26)
-        icons = [
-            os.path.join(sys._MEIPASS,"images/compress.png"),
-            os.path.join(sys._MEIPASS,"images/merge.png"),
-            os.path.join(sys._MEIPASS,"images/split.png"),
-            os.path.join(sys._MEIPASS,"images/htmltopdf.png"),
-            os.path.join(sys._MEIPASS,"images/pdftoexcel.png"),
-            os.path.join(sys._MEIPASS,"images/exceltopdf.png"),
-            os.path.join(sys._MEIPASS,"images/pdftoword.png"),
-            os.path.join(sys._MEIPASS,"images/wordtopdf.png"),
-            os.path.join(sys._MEIPASS,"images/pdftopp.png"),
-            os.path.join(sys._MEIPASS,"images/pptopdf.png"),
-            os.path.join(sys._MEIPASS,"images/pdftojpg.png"),
-            os.path.join(sys._MEIPASS,"images/jpgtopdf.png"),
-            # "C:/PdfConverter/images/compress.png",
-            # "C:/PdfConverter/images/merge.png",
-            # "C:/PdfConverter/images/split.png",
-            # "C:/PdfConverter/images/htmltopdf.png",
-            # "C:/PdfConverter/images/pdftoexcel.png",
-            # "C:/PdfConverter/images/exceltopdf.png",
-            # "C:/PdfConverter/images/pdftoword.png",
-            # "C:/PdfConverter/images/wordtopdf.png",
-            # "C:/PdfConverter/images/pdftopp.png",
-            # "C:/PdfConverter/images/pptopdf.png",
-            # "C:/PdfConverter/images/pdftojpg.png",
-            # "C:/PdfConverter/images/jpgtopdf.png",
+        badge_label = QLabel("v3.0 SOTA")
+        badge_label.setObjectName("brandBadge")
+        brand_row.addWidget(badge_label)
+        layout.addLayout(brand_row)
+
+        layout.addSpacing(20)
+
+        # Live Search Bar
+        self.search_input = QLineEdit()
+        self.search_input.setObjectName("searchBar")
+        self.search_input.setPlaceholderText("Search 17 tools (e.g. merge, compress, protect, excel)...")
+        self.search_input.setFixedWidth(360)
+        self.search_input.textChanged.connect(self.on_search_text_changed)
+        layout.addWidget(self.search_input)
+
+        layout.addStretch()
+
+        # Recent History button
+        history_btn = QPushButton("Recent History")
+        history_btn.setProperty("class", "secondaryBtn")
+        history_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        history_btn.clicked.connect(self.show_history_dialog)
+        layout.addWidget(history_btn)
+
+        # Theme toggle button
+        theme_label = "🌙 Dark" if self.current_theme == "light" else "☀️ Light"
+        self.theme_btn = QPushButton(theme_label)
+        self.theme_btn.setProperty("class", "secondaryBtn")
+        self.theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.theme_btn.clicked.connect(self.toggle_theme)
+        layout.addWidget(self.theme_btn)
+
+        # Logs button
+        logs_btn = QPushButton("Logs")
+        logs_btn.setProperty("class", "secondaryBtn")
+        logs_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        logs_btn.clicked.connect(self.open_logs_folder)
+        layout.addWidget(logs_btn)
+
+        # About button
+        about_btn = QPushButton("About")
+        about_btn.setProperty("class", "primaryBtn")
+        about_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        about_btn.clicked.connect(self.show_about_dialog)
+        layout.addWidget(about_btn)
+
+        self.main_layout.addWidget(self.top_container)
+
+    def setup_dashboard_page(self):
+        """Dashboard layout containing category chips and responsive cards grid."""
+        dash_layout = QVBoxLayout(self.dashboard_page)
+        dash_layout.setContentsMargins(0, 0, 0, 0)
+        dash_layout.setSpacing(0)
+
+        # Filter Chips Bar
+        chips_container = QWidget()
+        chips_container.setStyleSheet("background-color: transparent;")
+        chips_layout = QHBoxLayout(chips_container)
+        chips_layout.setContentsMargins(40, 18, 40, 10)
+        chips_layout.setSpacing(10)
+
+        self.chip_group = QButtonGroup(self)
+        self.chip_group.setExclusive(True)
+
+        categories = [
+            ("All (17)", "all"),
+            ("⚡ Essential", "essential"),
+            ("🔄 Convert to PDF", "to_pdf"),
+            ("🔁 Convert from PDF", "from_pdf"),
+            ("🔒 Security && OCR", "security")
         ]
-        button_names = ["Compress PDF","Merge PDF","Split PDF","HTML to PDF","PDF to Excel","Excel to PDF","PDF to Word","Word to PDF","PDF to PowerPoint","PowerPoint to PDF","PDF to JPG","JPG to PDF"]
-        for i in range(3):
-            for j in range(4):  # 4 columns
-                index = i * 4 + j
-                if index < len(icons):
-                    button = QPushButton()
-                    button.setIcon(QIcon(icons[index]))
-                    button.setIconSize(QSize(65, 65))  # Set the size of the icon
-                    button.setText(f"{button_names[index]}")
-                    button.setFixedSize(330, 150)
-                    button.setStyleSheet("font-weight: 600;font-size:25px;color: #33333b;")
-                    button.setToolTip(button_names[index])
-                    self.sub_layout2.addWidget(button, i, j)
-                    button.clicked.connect(lambda _, name=button_names[index]: self.on_button_clicked(name))
-                    self.sub_layout2.addWidget(button, i, j)
-                   
-        self.main_layout.addLayout(self.sub_layout2)
-        
-        spacer_item = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        self.main_layout.addItem(spacer_item)
 
-    def on_button_clicked(self, button_name):
-        window_types = {
-            "Merge PDF": "Merge",
-            "Compress PDF": "Compression",
-            "Split PDF": "Split",
-            "HTML to PDF": "Html2pdf",
-            "PDF to Excel": "pdf2excel",
-            "Excel to PDF": "excel2pdf",
-            "PDF to Word": "pdf2word",
-            "Word to PDF": "word2pdf",
-            "PDF to PowerPoint": "pdf2pptx",
-            "PowerPoint to PDF": "pptx2pdf",
-            "PDF to JPG": "pdf2jpg",
-            "JPG to PDF": "jpg2pdf"
-            ""
-        }
-        
-        if button_name in window_types:
-            window_type = window_types[button_name]
-            self.view_page = secondWindow(window_type)
-            self.view_page.show()
+        for idx, (label, cat_id) in enumerate(categories):
+            btn = QPushButton(label)
+            btn.setCheckable(True)
+            btn.setProperty("class", "categoryChip")
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            if idx == 0:
+                btn.setChecked(True)
+            self.chip_group.addButton(btn, idx)
+            btn.clicked.connect(lambda _, cid=cat_id: self.on_category_selected(cid))
+            chips_layout.addWidget(btn)
 
-if __name__ == "__main__":
+        chips_layout.addStretch()
+        dash_layout.addWidget(chips_container)
+
+        # Scrollable Cards Grid
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setStyleSheet("background-color: transparent;")
+
+        grid_wrapper = QWidget()
+        grid_wrapper.setStyleSheet("background-color: transparent;")
+        wrapper_layout = QHBoxLayout(grid_wrapper)
+        wrapper_layout.setContentsMargins(40, 6, 40, 30)
+
+        # Centered inner container with max width 1140px to prevent horizontal stretching
+        inner_container = QWidget()
+        inner_container.setMaximumWidth(1140)
+        inner_container.setStyleSheet("background-color: transparent;")
+
+        self.grid_layout = QGridLayout(inner_container)
+        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        self.grid_layout.setSpacing(14)
+
+        # Build cards
+        self.build_tool_cards()
+
+        wrapper_layout.addStretch()
+        wrapper_layout.addWidget(inner_container)
+        wrapper_layout.addStretch()
+
+        scroll_area.setWidget(grid_wrapper)
+        dash_layout.addWidget(scroll_area)
+
+    def build_tool_cards(self):
+        """Instantiate ModernToolCards and arrange in 3 responsive columns."""
+        # Clear existing
+        self.card_widgets.clear()
+        columns = 3
+
+        for index, (tool_name, tool_desc, category, action_key) in enumerate(TOOL_DEFINITIONS):
+            card = ModernToolCard(tool_name, tool_desc, category=category)
+            card.clicked.connect(lambda name=tool_name: self.open_tool(name))
+            row = index // columns
+            col = index % columns
+            self.grid_layout.addWidget(card, row, col)
+            self.card_widgets.append((card, tool_name, tool_desc, category))
+
+    def on_category_selected(self, category_id: str):
+        """Filter tools when category chip is clicked."""
+        self.active_category = category_id
+        self.apply_tool_filters()
+
+    def on_search_text_changed(self, text: str):
+        """Live search filter callback."""
+        self.current_search = text.strip().lower()
+        self.apply_tool_filters()
+
+    def apply_tool_filters(self):
+        """Show or hide cards based on current active category and search text."""
+        visible_cards = []
+        for card, name, desc, category in self.card_widgets:
+            match_cat = (self.active_category == "all" or category == self.active_category)
+            match_search = (
+                not self.current_search
+                or self.current_search in name.lower()
+                or self.current_search in desc.lower()
+            )
+            is_visible = match_cat and match_search
+            card.setVisible(is_visible)
+            if is_visible:
+                visible_cards.append(card)
+
+        # Re-arrange visible cards into neat 3 columns
+        columns = 3
+        for idx, card in enumerate(visible_cards):
+            r = idx // columns
+            c = idx % columns
+            self.grid_layout.addWidget(card, r, c)
+
+    def open_tool(self, tool_name: str):
+        """Open the tool workspace inside the stacked widget."""
+        action_map = {name: act for name, _, _, act in TOOL_DEFINITIONS}
+        action_type = action_map.get(tool_name, tool_name)
+
+        # Remove previous studio widget if any
+        if self.stack.count() > 1:
+            prev = self.stack.widget(1)
+            self.stack.removeWidget(prev)
+            prev.deleteLater()
+
+        # Instantiate fresh studio view and embed in stack
+        studio_view = secondWindow(action_type)
+        studio_view.closed_to_home.connect(self.show_dashboard)
+        self.stack.addWidget(studio_view)
+        self.stack.setCurrentIndex(1)
+
+    def show_dashboard(self):
+        """Return to dashboard view."""
+        self.stack.setCurrentIndex(0)
+
+    def toggle_theme(self):
+        """Toggle between Dark and Light mode."""
+        self.current_theme = "dark" if self.current_theme == "light" else "light"
+        apply_theme(self.current_theme)
+        set_setting("theme", self.current_theme)
+        self.theme_btn.setText("🌙 Dark" if self.current_theme == "light" else "☀️ Light")
+
+    def show_history_dialog(self):
+        """Open the recent conversions history dialog."""
+        dialog = HistoryDialog(self)
+        dialog.exec()
+
+    def open_logs_folder(self):
+        """Open the application logs folder in Windows Explorer or default file manager."""
+        logs_dir = os.path.join(get_app_data_dir(), "logs")
+        os.makedirs(logs_dir, exist_ok=True)
+        if sys.platform == 'win32':
+            os.startfile(logs_dir)
+        else:
+            QMessageBox.information(self, "Logs Location", f"Log files are stored at:\n{logs_dir}")
+
+    def show_about_dialog(self):
+        """Display About application dialog."""
+        QMessageBox.about(
+            self,
+            "About PDF Converter Pro",
+            "<h3>PDF Converter Pro</h3>"
+            "<p>Version 3.0.0 (SOTA Edition)</p>"
+            "<p>An enterprise-grade desktop suite for document conversion, "
+            "merging, splitting, high-ratio compression, OCR, and encryption.</p>"
+            "<p><b>Engine:</b> PyQt6, PyMuPDF (C++ MuPDF), pikepdf (C++ QPDF), openpyxl, python-pptx, Chromium Headless</p>"
+        )
+
+
+def main():
     app = QApplication(sys.argv)
-    app.setStyle("WindowsVista")
+    app.setStyle("Fusion")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

@@ -1,53 +1,89 @@
+# PDF-Converter Pro (v2.5)
+
+**PDF-Converter Pro** is an all-in-one desktop and command-line document management suite built with Python and PyQt6. It provides 16 essential tools to convert, merge, split, compress, watermark, protect, unlock, and rotate documents with a modern responsive UI, dark/light theme switching, and non-blocking background concurrency.
 
 ---
 
-# PDF-Converter
+## ✨ Comprehensive Features
 
-**PDF-Converter** is an all-in-one document management tool that simplifies the conversion between various document formats. It features a range of functionalities to cater to different document processing needs:
+### 📄 16 Integrated Tools:
+1. **Merge PDF**: Combine multiple PDFs in custom sequence with visual drag-to-reorder.
+2. **Compress PDF**: Optimize and deflate PDF content streams.
+3. **Split PDF**: Split into single pages, extract page ranges, or cherry-pick specific pages.
+4. **Rotate PDF**: Rotate all or specific pages clockwise by 90°, 180°, or 270°.
+5. **Protect PDF**: Encrypt documents with secure user/owner passwords.
+6. **Unlock PDF**: Decrypt and strip password restrictions from protected PDFs.
+7. **Watermark PDF**: Stamp custom diagonal semi-transparent vector text across all pages.
+8. **HTML to PDF**: Convert web documents into clean PDF files.
+9. **PDF to Word**: Convert PDF layouts into editable `.docx` Word documents.
+10. **Word to PDF**: Convert Word `.docx` documents into standardized PDFs.
+11. **PDF to Excel**: Extract tabular data from PDFs into structured `.xlsx` workbooks.
+12. **Excel to PDF**: Render spreadsheets into standardized PDF documents.
+13. **PDF to PowerPoint**: Generate presentation slide decks (`.pptx`) from PDF pages.
+14. **PowerPoint to PDF**: Convert slide presentations into PDFs.
+15. **PDF to JPG**: Render high-resolution PNG/JPG images of each page.
+16. **JPG to PDF**: Compile multiple photos/images into a single PDF document.
 
-## Features:
+### 🎨 GUI & UX Innovations:
+- **Dark Mode & Light Mode**: Toggle anytime between a sleek Dark Theme and a crisp Light Theme.
+- **Drag-to-Reorder**: Reorder files directly by dragging them in the staging list (crucial for PDF merging).
+- **Cancellable Background Concurrency**: Heavy conversions run in background `QThread` workers with live progress reporting and a one-click "Cancel" button.
+- **Recent Conversion History**: History dialog with double-click "Open File" and "Show in Folder" shortcuts.
+- **Dynamic Vector Assets**: High-DPI vector icons generated programmatically—zero missing image asset bugs.
+- **Secure File Storage**: User-isolated temporary and application data directories in `%LOCALAPPDATA%`, eliminating multi-user collisions and permission failures.
 
-- **Cross-Format Conversion**: Convert files between PDF, Word (.docx), Excel (.xlsx), and PowerPoint (.pptx) formats.
-- **HTML to PDF**: Convert HTML documents to PDF format.
-- **Advanced PDF Operations**: Merge, split, and compress PDF files with ease.
-- **Image Handling**: Convert images to PDF or extract images from PDF files.
-- **Batch Processing**: Handle multiple file conversions simultaneously to save time.
-- **Logging Support**: Maintain detailed logs to track and troubleshoot conversion processes.
+### 💻 Dual Interface: GUI & CLI
+Run the full graphical dashboard or automate workflows via the built-in terminal CLI:
+```bash
+# Merge PDFs
+python PDF_TOOL/cli.py merge doc1.pdf doc2.pdf -o merged.pdf
 
-## Built With:
+# Watermark
+python PDF_TOOL/cli.py watermark input.pdf --text "CONFIDENTIAL" --opacity 0.3 -o watermarked.pdf
 
-- **Python**: The core language used for development.
-- **docx2pdf**: For converting Word documents to PDF.
-- **pdfkit**: For HTML to PDF conversion.
-- **PyPDF2**: For advanced PDF operations like merging and splitting.
-- **PyQt6**: For creating a user-friendly graphical interface.
-- **PyInstaller**: For packaging the application for easy deployment.
+# Password Protect
+python PDF_TOOL/cli.py protect input.pdf --password "secret123" -o protected.pdf
 
-## Installation and Usage:
+# Unlock
+python PDF_TOOL/cli.py unlock protected.pdf --password "secret123" -o unlocked.pdf
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/DhruvalPtl/PDF-Converter.git
-   ```
+# Rotate
+python PDF_TOOL/cli.py rotate input.pdf --angle 90 -o rotated.pdf
 
-2. **Install Dependencies**:
-   Navigate to the project directory and install the required libraries:
-   ```bash
-   pip install -r requirements.txt
-   ```
-   Also Manually download and install wkhtmltopdf from folder PDF_TOOL/wkhtmltopdf or from https://wkhtmltopdf.org/downloads.html
-
-3. **Run the Application**:
-   Execute the main script to launch the application:
-   ```bash
-   python main.py
-   ```
-
-## Contributions:
-
-Contributions to improve the tool are welcome! You can contribute by:
-
-- **Reporting Issues**: If you encounter any bugs or have feature requests, please open an issue.
-- **Pull Requests**: Submit pull requests with enhancements or bug fixes.
+# Split
+python PDF_TOOL/cli.py split input.pdf --range 1 5 -o output_dir/
+```
 
 ---
+
+## 🚀 Getting Started
+
+### 1. Installation
+```bash
+git clone https://github.com/DhruvalPtl/PDF-Converter.git
+cd PDF-Converter
+
+# Set up virtual environment
+uv venv .venv
+uv pip install -r PDF_TOOL/requirements.txt
+```
+
+### 2. Launch the Application
+```bash
+python PDF_TOOL/main.py
+```
+
+### 3. Run the Test Suite
+```bash
+pytest tests/ -v
+```
+
+---
+
+## 🏗️ Continuous Integration
+Automated testing via GitHub Actions ([`.github/workflows/ci.yml`](file:///.github/workflows/ci.yml)) runs on every push and pull request across Windows and Ubuntu on Python 3.11 and 3.12.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License.

@@ -1,25 +1,36 @@
-import logging
-import shutil
+"""
+Setup script to ensure required application directories and resources exist.
+"""
+
 import os
+import shutil
+import logging
+from app_paths import get_app_data_dir, get_temp_root_dir
 
-def install_resources():
+logger = logging.getLogger(__name__)
 
-    source_dir = os.path.join(os.path.dirname(__file__), 'resources')
-    target_dir = 'C:/PdfConverter'  
-    logging.info(f"Starting installation. Source: {source_dir}, Target: {target_dir}")
-
+def install_resources() -> None:
+    """
+    Ensure required application directories exist safely in user profile.
+    Copies any bundled resources if present.
+    """
     try:
+        app_data = get_app_data_dir()
+        temp_dir = get_temp_root_dir()
 
-        os.makedirs(target_dir, exist_ok=True)
-        os.makedirs("C:/PdfConverter/Temp", exist_ok=True)
-        os.makedirs("C:/PdfConverter/Temp1", exist_ok=True)
-        for item in os.listdir(source_dir):
-            s = os.path.join(source_dir, item)
-            d = os.path.join(target_dir, item)
-            if os.path.isdir(s):
-                shutil.copytree(s, d, dirs_exist_ok=True)
-            else:
-                shutil.copy2(s, d)
-        logging.info("Installation completed successfully.")
+        os.makedirs(os.path.join(temp_dir, 'Temp'), exist_ok=True)
+        os.makedirs(os.path.join(temp_dir, 'Temp1'), exist_ok=True)
+        os.makedirs(os.path.join(app_data, 'logs'), exist_ok=True)
+
+        source_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources')
+        if os.path.exists(source_dir):
+            for item in os.listdir(source_dir):
+                s = os.path.join(source_dir, item)
+                d = os.path.join(app_data, item)
+                if os.path.isdir(s):
+                    shutil.copytree(s, d, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(s, d)
+        logger.info("Application environment initialized successfully.")
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
+        logger.error(f"Error during resource initialization: {e}")

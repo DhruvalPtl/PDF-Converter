@@ -1,16 +1,35 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
 
+datas = []
+if os.path.exists("resources"):
+    datas.append(("resources", "resources"))
+if os.path.exists("images"):
+    datas.append(("images", "images"))
+if os.path.exists("wkhtmltopdf"):
+    datas.append(("wkhtmltopdf", "wkhtmltopdf"))
 
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[("resources","resources"),("images","images")],
-    hiddenimports=[],
+    datas=datas,
+    hiddenimports=[
+        'pypdf',
+        'pdf2docx',
+        'pdfplumber',
+        'fitz',
+        'img2pdf',
+        'openpyxl',
+        'pptx',
+        'pikepdf',
+        'win32com.client',
+        'pythoncom'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['matplotlib', 'scipy', 'tkinter', 'sqlalchemy'],
     noarchive=False,
     optimize=0,
 )
@@ -35,5 +54,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon = "images/1.png"
+    icon="images/1.png" if os.path.exists("images/1.png") else None
 )
