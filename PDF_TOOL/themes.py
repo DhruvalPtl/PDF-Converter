@@ -142,20 +142,20 @@ QFrame.toolCard {
 }
 
 QFrame.toolCard:hover {
-    border: 1px solid #4F46E5;
-    background-color: #FBFBFE;
+    border: 1.5px solid #4F46E5;
+    background-color: #F8FAFC;
 }
 
 QLabel.cardTitle {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: #0F172A;
 }
 
 QLabel.cardDesc {
-    font-size: 12px;
+    font-size: 13px;
     color: #64748B;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 QLabel.cardBadge {
@@ -163,18 +163,21 @@ QLabel.cardBadge {
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 4px;
-    background-color: #F1F5F9;
-    color: #64748B;
 }
 
-QLabel.cardArrow {
-    font-size: 18px;
-    color: #CBD5E1;
-    font-weight: 600;
+QPushButton#cardActionBtn {
+    background-color: #4F46E5;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+    padding: 6px 14px;
 }
 
-QFrame.toolCard:hover QLabel.cardArrow {
-    color: #4F46E5;
+QPushButton#cardActionBtn:hover, QFrame.toolCard:hover QPushButton#cardActionBtn {
+    background-color: #4338CA;
+    color: #FFFFFF;
 }
 
 /* Studio & Dropzone */
@@ -490,20 +493,20 @@ QFrame.toolCard {
 }
 
 QFrame.toolCard:hover {
-    border: 1px solid #6366F1;
+    border: 1.5px solid #6366F1;
     background-color: #161F30;
 }
 
 QLabel.cardTitle {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: #F8FAFC;
 }
 
 QLabel.cardDesc {
-    font-size: 12px;
+    font-size: 13px;
     color: #94A3B8;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 QLabel.cardBadge {
@@ -511,18 +514,21 @@ QLabel.cardBadge {
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 4px;
-    background-color: #1E293B;
-    color: #94A3B8;
 }
 
-QLabel.cardArrow {
-    font-size: 18px;
-    color: #475569;
-    font-weight: 600;
+QPushButton#cardActionBtn {
+    background-color: #6366F1;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+    padding: 6px 14px;
 }
 
-QFrame.toolCard:hover QLabel.cardArrow {
-    color: #818CF8;
+QPushButton#cardActionBtn:hover, QFrame.toolCard:hover QPushButton#cardActionBtn {
+    background-color: #4F46E5;
+    color: #FFFFFF;
 }
 
 /* Studio & Dropzone */

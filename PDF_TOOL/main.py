@@ -330,6 +330,7 @@ class MainWindow(QMainWindow):
         self.grid_layout = QGridLayout(grid_container)
         self.grid_layout.setContentsMargins(28, 20, 28, 28)
         self.grid_layout.setSpacing(14)
+        self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.build_tool_cards()
 
@@ -343,6 +344,7 @@ class MainWindow(QMainWindow):
 
         for index, (tool_name, tool_desc, category, action_key) in enumerate(TOOL_DEFINITIONS):
             card = ModernToolCard(tool_name, tool_desc, category=category)
+            card.apply_card_theme(self.current_theme == "dark")
             card.clicked.connect(lambda name=tool_name: self.open_tool(name))
             row = index // columns
             col = index % columns
@@ -419,6 +421,8 @@ class MainWindow(QMainWindow):
         apply_theme(self.current_theme)
         set_setting("theme", self.current_theme)
         self.theme_btn.setText("🌙 Dark Mode" if self.current_theme == "light" else "☀️ Light Mode")
+        for card, _, _, _ in self.card_widgets:
+            card.apply_card_theme(self.current_theme == "dark")
 
     def show_history_dialog(self):
         """Open the recent conversions history dialog."""
